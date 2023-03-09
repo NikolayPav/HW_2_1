@@ -13,15 +13,53 @@ public:
         x = 0;
         y = 0;
         z = 0;
+        Info = new std::string("Hello");
     }
+
+    Vector(float num) = delete;
 
     Vector(float x, float y, float z)
     {
         this->x = x;
         this->y = y;
         this->z = z;
+       Info = new std::string("Hello");
     }
 
+   Vector(const Vector& other)
+    {
+        std::cout << "\n Copy constructor \n";
+        x = other.x;
+        y = other.y;
+        z = other.z;   
+        Info = new std::string("Hello");
+    }
+
+    ~Vector()
+    {
+        //std::cout << "Destructor calling\n";
+        if (Info)
+        {
+            delete Info;
+        }
+    }
+
+    Vector& operator=(Vector& other)
+    {
+        std::cout << "Operator = \n";
+        x = other.x;
+        y = other.y;
+        z = other.z;
+
+        if (other.Info)
+        {
+            if (Info) delete Info;
+            Info = new std::string(*(other.Info));
+        }
+       
+        return (*this);
+   }
+    
     operator float()
     {
         return sqrt(x * x + y * y + z * z);
@@ -57,6 +95,8 @@ private:
     float x;
     float y;
     float z;
+
+    std::string* Info;
 };
 
 Vector operator+(const Vector& a, const Vector& b)
@@ -96,18 +136,163 @@ bool operator>(const Vector& a, const Vector& b)
     return false;
 }
 
+
+class A
+{
+public:
+    A(int a)
+    {
+        std::cout << "int constructor\n";
+        test = a;
+    }
+
+    A(char a) = delete;
+private:
+    int test;
+};
+
+
+class MyArray
+{
+public:
+    MyArray(int row, int col)
+    {
+        n = row;
+        m = col;
+        matr = new int* [n]; 
+        
+        for (int i = 0; i < n; i++)
+        {
+            matr[i] = new int[m];
+        }
+        
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < m; j++)
+            {
+                matr[i][j] = 0;
+            }
+        }
+        
+        Name = new std::string("Array");
+    }
+
+    ~MyArray()
+        {
+        for (int i = 0; i < n; i++)
+        {
+            if (matr[i]) delete matr[i];
+        }
+
+        if (matr) delete[] matr;
+
+        if (Name) delete Name;
+        std::cout << "Array delete\n";
+        }
+    
+    MyArray& operator=(MyArray& other)
+    {
+        if (other.matr)
+        {
+            for (int i = 0; i < n; i++)
+            {
+                if (matr[i]) delete matr[i];
+            }
+            if (matr) delete[] matr;
+        }
+
+        n = other.n;
+        m = other.m;
+        
+        matr = new int* [n];
+
+        for (int i = 0; i < n; i++)
+        {
+            matr[i] = new int[m];
+        }
+                
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < m; j++)
+            {
+                matr[i][j] = other.matr[i][j];
+            }
+        }
+
+        if (other.Name)
+        {
+            if (Name) delete Name;
+            Name = new std::string(*(other.Name));
+        }
+      
+        std::cout << "Operator = \n"; 
+        return (*this);
+    }
+
+    friend std::ostream& operator<<(std::ostream& out, const MyArray& a);
+    friend std::istream& operator>>(std::istream& in, MyArray& a);
+
+private:
+ 
+    int** matr;
+    int n;
+    int m;
+    std::string* Name;
+};
+
+std::ostream& operator<<(std::ostream& out, const MyArray& a)
+{
+    std::cout << "Array "<<*a.Name <<"[" << a.n << ", " << a.m << "]:\n";
+    for (int i = 0; i < a.n; i++)
+    {
+        for (int j = 0; j < a.m; j++)
+        {
+            out << a.matr[i][j]<<' ';
+        }
+        std::cout <<'\n';
+    }
+    
+    return out;
+}
+
+
+std::istream& operator>>(std::istream& in, MyArray& a)
+{
+    delete a.Name;
+    std::string Name;
+    std::cout << "Enter Name for Array:";
+    std::cin >> Name;
+    a.Name = new std::string(Name);
+   
+    for (int i = 0; i < a.n; i++)
+    {
+        for (int j = 0; j < a.m; j++)
+        {
+            std::cout << "Enter value [" << i<<", "<< j<<"]:";
+            in >> a.matr[i][j];
+        }
+    }
+    
+    return in;
+}
+
+
 int main()
 {
-    Vector v1(0, 1, 2);
-    Vector v2(3, 4, 5);
+    /*Vector v1(1,1,1);
+    Vector v2(2,2,2); 
     Vector v3;
-    v3 = v1 + v2;
-    std::cout << v3<<'\n';
-    std::cout << "v3 lenght: " << static_cast<float>(v3) << '\n';
-    Vector v4=v1*2.0f;
-    std::cout << "v1*2=" << v4 << '\n';
-    std::cout << "v2-v1=" << v2-v1 << '\n';
-    Vector v5; 
-    std::cin >> v5;
-    std::cout << "v5=" << v5 << '\n';
+    std::cout << v2 << '\n'; 
+    v3 = v2 = v1;
+    std::cout << v2<<'\n';
+    std::cout << v3 << '\n';*/
+        
+    MyArray Array1(2, 2);
+    std::cout << Array1;
+    std::cin >> Array1;
+    std::cout << Array1;
+    MyArray Array2(2, 3);
+    std::cout << Array2;
+    Array2 = Array1;
+    std::cout << Array2;
 }
