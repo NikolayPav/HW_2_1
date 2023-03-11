@@ -4,6 +4,8 @@
 #include <iostream>
 #include <cmath>
 #include <istream>
+#include <string>
+#include <vector>
 
 class Vector
 {
@@ -46,7 +48,7 @@ public:
 
     Vector& operator=(Vector& other)
     {
-        std::cout << "Operator = \n";
+       // std::cout << "Operator = \n";
         x = other.x;
         y = other.y;
         z = other.z;
@@ -116,7 +118,7 @@ Vector operator*(const Vector& a, const float& b)
 
 std::ostream& operator<<(std::ostream& out, const Vector& v)
 {
-    out << ' ' << v.x << ' ' << v.y << ' ' << v.z;
+    out << "{" << v.x << ";" << v.y << ";" << v.z<<"}";
     return out;
 }
 
@@ -136,7 +138,6 @@ bool operator>(const Vector& a, const Vector& b)
     return false;
 }
 
-
 class A
 {
 public:
@@ -151,10 +152,16 @@ private:
     int test;
 };
 
-
 class MyArray
 {
 public:
+    MyArray()
+    {
+        Name = new std::string("Array");
+        n = 0;
+        m = 0;
+    }
+    
     MyArray(int row, int col)
     {
         n = row;
@@ -187,7 +194,7 @@ public:
         if (matr) delete[] matr;
 
         if (Name) delete Name;
-        std::cout << "Array delete\n";
+       // std::cout << "Array delete\n";
         }
     
     MyArray& operator=(MyArray& other)
@@ -225,7 +232,7 @@ public:
             Name = new std::string(*(other.Name));
         }
       
-        std::cout << "Operator = \n"; 
+      //  std::cout << "Operator = \n"; 
         return (*this);
     }
 
@@ -255,7 +262,6 @@ std::ostream& operator<<(std::ostream& out, const MyArray& a)
     return out;
 }
 
-
 std::istream& operator>>(std::istream& in, MyArray& a)
 {
     delete a.Name;
@@ -276,23 +282,121 @@ std::istream& operator>>(std::istream& in, MyArray& a)
     return in;
 }
 
+class Item
+{
+private:
+     std::string ItemName;
+public:
+    Item()
+    {
+        ItemName = "None";
+    }
+
+    Item(std::string inItemName)
+    {
+        ItemName = inItemName;
+       
+    }
+
+    void ShowItemName()
+    {
+        std::cout << ItemName<<'\n';
+    }
+};
+
+class Guild;
+
+class Player
+{
+private:
+    Vector Location;
+    Item* MainItem;
+    std::string PlayerName;
+    std::vector<Guild*> Guilds;
+public:
+    Player()
+    {
+        PlayerName = "None";
+    }
+    
+    Player(std::string inPlayerName, Vector InitialLocation)
+    {
+        PlayerName = inPlayerName;
+        Location = InitialLocation;
+   }
+    
+    void ShowPlayerInfo()
+    {
+        std::cout << PlayerName << " is at " << Location << '\n';
+        std::cout << PlayerName << " have ";
+        if (MainItem)
+        {
+            MainItem->ShowItemName();
+        }
+        else std::cout << "none\n";
+    }
+    void SetNewItem(Item* newItem)
+    {
+        MainItem = newItem;
+    }
+
+    void JoinGuild(Guild* GuildToJoin)
+    {
+        Guilds.push_back(GuildToJoin);
+    }
+
+    friend class Guild;
+};
+
+class PlayersParty
+{
+private:
+    Player** players;
+    int CurrentPlayersNum;
+public:
+    PlayersParty()
+    {
+        CurrentPlayersNum = 0;
+        players = new Player * [4];
+    }
+    void AddPlayerToParty(Player* newPlayer)
+    {
+        players[CurrentPlayersNum] = newPlayer;
+        CurrentPlayersNum++;
+    }
+    void ShowAllPlayerInfo()
+    {
+        for (int i = 0; i < CurrentPlayersNum; i++)
+        {
+            players[i]->ShowPlayerInfo();
+        }
+    }
+};
+
+class Guild
+{
+private:
+    std::vector<Player*> Players;
+public:
+        void AddNewPlayer(Player* newPlayer)
+        {
+            newPlayer->JoinGuild(this);
+            Players.push_back(newPlayer);
+        }
+        void RemovePlayer(Player* PlayerToRemove)
+        {
+            Players.push_back(PlayerToRemove);
+        }
+};
 
 int main()
 {
-    /*Vector v1(1,1,1);
-    Vector v2(2,2,2); 
-    Vector v3;
-    std::cout << v2 << '\n'; 
-    v3 = v2 = v1;
-    std::cout << v2<<'\n';
-    std::cout << v3 << '\n';*/
-        
-    MyArray Array1(2, 2);
-    std::cout << Array1;
-    std::cin >> Array1;
-    std::cout << Array1;
-    MyArray Array2(2, 3);
-    std::cout << Array2;
-    Array2 = Array1;
-    std::cout << Array2;
+    Item* Sword = new Item("Sword");
+    Player* NewPlayerA = new Player("Vasya", Vector(1, 0, 0));
+    NewPlayerA->SetNewItem(Sword);
+    Player* NewPlayerB= new Player("Ivan", Vector(2, 0, 0));
+    PlayersParty PlayersAB;
+    PlayersAB.AddPlayerToParty(NewPlayerA);
+    PlayersAB.AddPlayerToParty(NewPlayerB);
+    PlayersAB.ShowAllPlayerInfo();
 }
